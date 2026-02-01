@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Pipchi/" />
+  <Folder Name="/Pipchi/src/" />
+  <Folder Name="/Pipchi/src/Pipchi.Core/">
+    <Project Path="Pipchi/src/Pipchi.Core/Pipchi.Core.csproj" />
+  </Folder>
+  <Folder Name="/SharedKernel/" />
+  <Folder Name="/SharedKernel/src/" />
+  <Folder Name="/SharedKernel/src/Pipchi.SharedKernel/">
+    <Project Path="SharedKernel/src/Pipchi.SharedKernel/Pipchi.SharedKernel.csproj" Id="6d89aab6-d9ed-4040-980a-ba31a2f5b7aa" />
+  </Folder>
+</Solution>
