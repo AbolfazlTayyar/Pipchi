@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\SharedKernel\src\Pipchi.SharedKernel\Pipchi.SharedKernel.csproj" />
+  </ItemGroup>
+
 </Project>
