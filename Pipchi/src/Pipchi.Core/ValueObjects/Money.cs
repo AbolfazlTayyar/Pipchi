@@ -1,4 +1,6 @@
-﻿using Pipchi.SharedKernel;
+﻿using Ardalis.GuardClauses;
+using Pipchi.Core.Exceptions;
+using Pipchi.SharedKernel;
 
 namespace Pipchi.Core.ValueObjects;
 
@@ -6,7 +8,7 @@ public class Money : ValueObject
 {
     public Money(decimal amount, string currency)
     {
-        Amount = amount;
+        Amount = Guard.Against.NegativeOrZero(amount, nameof(amount));
         Currency = currency;
     }
 
@@ -22,7 +24,7 @@ public class Money : ValueObject
     public static Money operator -(Money a, Money b)
     {
         if (a.Currency != b.Currency)
-            throw new InvalidOperationException("Cannot subtract money with different currencies");
+            throw new IncompatibleCurrencyException();
         return new Money(a.Amount - b.Amount, a.Currency);
     }
 }

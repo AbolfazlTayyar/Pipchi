@@ -1,4 +1,5 @@
-﻿using Pipchi.Core.Interfaces;
+﻿using Ardalis.GuardClauses;
+using Pipchi.Core.Interfaces;
 using Pipchi.Core.ValueObjects;
 using Pipchi.SharedKernel;
 using Pipchi.SharedKernel.Interfaces;
@@ -7,6 +8,13 @@ namespace Pipchi.Core.AccountAggregate;
 
 public class Account : BaseEntity<Guid>, IAggregateRoot
 {
+    public Account(Guid id,
+        Money balance)
+    {
+        Id = Guard.Against.Default(id, nameof(id));
+        Balance = balance;
+    }
+
     private readonly List<Order> _orders = new();
     public IEnumerable<Order> Orders => _orders.AsReadOnly();
 
