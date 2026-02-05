@@ -36,4 +36,12 @@ public class Account : BaseEntity<Guid>, IAggregateRoot
         var margin = CalculateMargin(marginCalculator);
         return equity - margin;
     }
+
+    public void AddNewOrder(Order order)
+    {
+        Guard.Against.Null(order, nameof(order));
+        Guard.Against.Default(order.Id, nameof(order.Id));
+
+        _orders.Add(order);
+    }
 }
