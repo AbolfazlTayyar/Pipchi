@@ -39,7 +39,7 @@ public class Position : BaseEntity<Guid>
     public decimal? StopLoss { get; private set; }
     public decimal? TakeProfit { get; private set; }
     public decimal? Profit { get; private set; }
-    public DateTimeOffset ClosedAt { get; private set; }
+    public DateTimeOffset? ClosedAt { get; private set; }
 
     public void ClosePosition(decimal profit)
     {

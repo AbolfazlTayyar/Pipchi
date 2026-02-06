@@ -1,8 +1,17 @@
 <Solution>
   <Folder Name="/Pipchi/" />
-  <Folder Name="/Pipchi/src/" />
+  <Folder Name="/Pipchi/src/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/Pipchi/src/Pipchi.Api/">
+    <Project Path="Pipchi/src/Pipchi.Api/Pipchi.Api.csproj" Id="38aec435-b0d8-41cf-9043-dbc78d1660f4" />
+  </Folder>
   <Folder Name="/Pipchi/src/Pipchi.Core/">
     <Project Path="Pipchi/src/Pipchi.Core/Pipchi.Core.csproj" />
+  </Folder>
+  <Folder Name="/Pipchi/src/Pipchi.Infrastructure/">
+    <Project Path="Pipchi/src/Pipchi.Infrastructure/Pipchi.Infrastructure.csproj" Id="d8550c64-f00a-450f-b1d8-557cf67a8ed8" />
   </Folder>
   <Folder Name="/SharedKernel/" />
   <Folder Name="/SharedKernel/src/" />
