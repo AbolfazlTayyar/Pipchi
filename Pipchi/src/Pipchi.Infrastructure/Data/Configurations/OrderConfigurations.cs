@@ -5,15 +5,10 @@ using Pipchi.Core.SyncedAggregates;
 
 namespace Pipchi.Infrastructure.Data.Configurations;
 
-public class OrderConfigurations : IEntityTypeConfiguration<Order>
+public class OrderConfigurations : BaseEntityConfiguration<Order, Guid>
 {
-    public void Configure(EntityTypeBuilder<Order> builder)
+    protected override void ConfigureEntity(EntityTypeBuilder<Order> builder)
     {
-        builder.HasKey(x => x.Id);
-
-        builder.Property(x => x.Id)
-            .ValueGeneratedNever();
-
         builder.HasOne<Account>()
             .WithMany()
             .HasForeignKey(x => x.AccountId);
@@ -23,28 +18,23 @@ public class OrderConfigurations : IEntityTypeConfiguration<Order>
             .HasForeignKey(x => x.SymbolId);
 
         builder.Property(x => x.Type)
-            .IsRequired();
-
-        builder.Property(x => x.CreatedAt)
+            .HasMaxLength(ColumnConstants.DEFAULT_TRADE_TYPE_ENUM_LENGTH)
             .IsRequired();
 
         builder.OwnsOne(x => x.Volume, volume =>
         {
             volume.Property(z => z.Value)
-                .HasPrecision(18, 2)
-                .IsRequired();
+                .HasColumnName("Volume")
+                .HasPrecision(18, 2);
         });
 
         builder.Property(x => x.EntryPrice)
-            .HasPrecision(18, 5)
-            .IsRequired();
+            .HasPrecision(18, 5);
 
         builder.Property(x => x.StopLoss)
             .HasPrecision(18, 5);
 
         builder.Property(x => x.TakeProfit)
             .HasPrecision(18, 5);
-
-        builder.Ignore(x => x.Events);
     }
 }

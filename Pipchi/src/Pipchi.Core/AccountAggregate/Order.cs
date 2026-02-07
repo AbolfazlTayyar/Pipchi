@@ -27,6 +27,8 @@ public class Order : BaseEntity<Guid>
         TakeProfit = takeProfit;
     }
 
+    private Order() { } // For EF Core
+
     public Guid AccountId { get; private set; }
     public int SymbolId { get; private set; }
     public TradeType Type { get; private set; }

@@ -30,6 +30,8 @@ public class Position : BaseEntity<Guid>
         Profit = profit;
     }
 
+    private Position() { } // For EF Core
+
     public Guid OrderId { get; private set; }
     public int SymbolId { get; private set; }
     public Volume Volume { get; private set; }

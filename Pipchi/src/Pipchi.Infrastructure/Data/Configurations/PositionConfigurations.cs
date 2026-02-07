@@ -5,15 +5,10 @@ using Pipchi.Core.SyncedAggregates;
 
 namespace Pipchi.Infrastructure.Data.Configurations;
 
-public class PositionConfigurations : IEntityTypeConfiguration<Position>
+public class PositionConfigurations : BaseEntityConfiguration<Position, Guid>
 {
-    public void Configure(EntityTypeBuilder<Position> builder)
+    protected override void ConfigureEntity(EntityTypeBuilder<Position> builder)
     {
-        builder.HasKey(x => x.Id);
-
-        builder.Property(x => x.Id)
-            .ValueGeneratedNever();
-
         builder.HasOne<Order>()
             .WithMany()
             .HasForeignKey(x => x.OrderId);
@@ -25,19 +20,20 @@ public class PositionConfigurations : IEntityTypeConfiguration<Position>
         builder.OwnsOne(x => x.Volume, volume =>
         {
             volume.Property(z => z.Value)
-                .HasPrecision(18, 2)
-                .IsRequired();
+                .HasColumnName("Volume")
+                .HasPrecision(18, 2);
         });
 
         builder.Property(x => x.Type)
+            .HasMaxLength(ColumnConstants.DEFAULT_TRADE_TYPE_ENUM_LENGTH)
             .IsRequired();
 
         builder.Property(x => x.Status)
+            .HasMaxLength(ColumnConstants.DEFAULT_POSITION_STATUS_ENUM_LENGTH)
             .IsRequired();
 
         builder.Property(x => x.EntryPrice)
-            .HasPrecision(18, 5)
-            .IsRequired();
+            .HasPrecision(18, 5);
 
         builder.Property(x => x.StopLoss)
             .HasPrecision(18, 5);
@@ -45,6 +41,7 @@ public class PositionConfigurations : IEntityTypeConfiguration<Position>
         builder.Property(x => x.TakeProfit)
             .HasPrecision(18, 5);
 
-        builder.Ignore(x => x.Events);
+        builder.Property(x => x.Profit)
+            .HasPrecision(18, 2);
     }
 }

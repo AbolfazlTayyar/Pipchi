@@ -15,6 +15,8 @@ public class Account : BaseEntity<Guid>, IAggregateRoot
         Balance = balance;
     }
 
+    private Account() { } // For EF Core
+
     private readonly List<Order> _orders = new();
     public IEnumerable<Order> Orders => _orders.AsReadOnly();
 

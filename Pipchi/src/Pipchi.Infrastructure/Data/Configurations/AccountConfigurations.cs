@@ -4,20 +4,14 @@ using Pipchi.Core.AccountAggregate;
 
 namespace Pipchi.Infrastructure.Data.Configurations;
 
-public class AccountConfigurations : IEntityTypeConfiguration<Account>
+public class AccountConfigurations : BaseEntityConfiguration<Account, Guid>
 {
-    public void Configure(EntityTypeBuilder<Account> builder)
+    protected override void ConfigureEntity(EntityTypeBuilder<Account> builder)
     {
-        builder.HasKey(x => x.Id);
-
-        builder.Property(x => x.Id)
-            .ValueGeneratedNever();
-
         builder.OwnsOne(x => x.Balance, balance =>
         {
             balance.Property(z => z.Amount)
-                .HasPrecision(18, 2)
-                .IsRequired();
+                .HasPrecision(18, 2);
 
             balance.Property(z => z.Currency)
                 .HasMaxLength(3)
@@ -30,6 +24,5 @@ public class AccountConfigurations : IEntityTypeConfiguration<Account>
 
         builder.Ignore(x => x.Orders);
         builder.Ignore(x => x.Positions);
-        builder.Ignore(x => x.Events);
     }
 }

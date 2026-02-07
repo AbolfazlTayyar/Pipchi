@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pipchi.Core.AccountAggregate;
 using Pipchi.Core.SyncedAggregates;
+using Pipchi.Infrastructure.Data.Extensions;
 using System.Reflection;
 
 namespace Pipchi.Infrastructure.Data;
@@ -22,6 +23,7 @@ public class ApplicationDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        modelBuilder.AddRestrictDeleteBehaviorConvention();
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
