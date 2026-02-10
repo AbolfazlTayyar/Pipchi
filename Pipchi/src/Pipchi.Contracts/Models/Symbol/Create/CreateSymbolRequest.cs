@@ -1,4 +1,4 @@
-﻿namespace Pipchi.Api.Models.Symbol;
+﻿namespace Pipchi.Contracts.Models.Symbol.Create;
 
 public class CreateSymbolRequest : BaseRequest
 {

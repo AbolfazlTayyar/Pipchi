@@ -7,15 +7,13 @@ namespace Pipchi.Core.SyncedAggregates;
 
 public class Symbol : BaseEntity<int>, IAggregateRoot
 {
-    public Symbol(int id,
-        string name,
+    public Symbol(string name,
         int digits,
         decimal minPrice,
         decimal maxPrice,
         decimal minVolume,
         decimal maxVolume)
     {
-        Id = Guard.Against.Default(id, nameof(id));
         Name = Guard.Against.NullOrEmpty(name, nameof(name));
         Digits = Guard.Against.NegativeOrZero(digits, nameof(digits));
         MinPrice = Guard.Against.NegativeOrZero(minPrice, nameof(minPrice));

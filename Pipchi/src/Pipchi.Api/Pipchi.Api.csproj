@@ -8,6 +8,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Pipchi.Contracts\Pipchi.Contracts.csproj" />
     <ProjectReference Include="..\Pipchi.Infrastructure\Pipchi.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

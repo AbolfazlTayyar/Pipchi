@@ -1,4 +1,4 @@
-﻿namespace Pipchi.Api.Models;
+﻿namespace Pipchi.Contracts.Models;
 
 public abstract class BaseRequest
 {

@@ -7,6 +7,9 @@
   <Folder Name="/Pipchi/src/Pipchi.Api/">
     <Project Path="Pipchi/src/Pipchi.Api/Pipchi.Api.csproj" Id="38aec435-b0d8-41cf-9043-dbc78d1660f4" />
   </Folder>
+  <Folder Name="/Pipchi/src/Pipchi.Contracts/">
+    <Project Path="Pipchi/src/Pipchi.Contracts/Pipchi.Contracts.csproj" Id="2d9d51a8-8340-4062-b543-aee84e1671cd" />
+  </Folder>
   <Folder Name="/Pipchi/src/Pipchi.Core/">
     <Project Path="Pipchi/src/Pipchi.Core/Pipchi.Core.csproj" />
   </Folder>
