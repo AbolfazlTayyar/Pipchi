@@ -5,7 +5,7 @@ using Pipchi.Core.SyncedAggregates;
 
 namespace Pipchi.Infrastructure.Data.Configurations;
 
-public class OrderConfigurations : BaseEntityConfiguration<Order, Guid>
+public class OrderConfigurations : BaseEntityConfiguration<Order>
 {
     protected override void ConfigureEntity(EntityTypeBuilder<Order> builder)
     {

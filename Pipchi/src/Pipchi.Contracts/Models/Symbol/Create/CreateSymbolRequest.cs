@@ -2,6 +2,8 @@
 
 public class CreateSymbolRequest : BaseRequest
 {
+    public const string Route = "api/symbols";
+
     public string Name { get; set; }
     public int Digits { get; set; }
     public decimal MinPrice { get; set; }

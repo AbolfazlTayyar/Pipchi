@@ -1,24 +1,38 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Pipchi.Core.Interfaces;
 using Pipchi.Infrastructure.Data;
+using Pipchi.Infrastructure.Services;
+using Pipchi.SharedKernel.Interfaces;
 
-namespace Pipchi.Infrastructure
+namespace Pipchi.Infrastructure;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddDatabase(configuration);
-            return services;
-        }
+        services.AddDatabase(configuration)
+            .AddServices();
+        return services;
+    }
 
-        private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+    private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-            return services;
-        }
+        return services;
+    }
+
+    private static IServiceCollection AddServices(this IServiceCollection services)
+    {
+        services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+        services.AddScoped(typeof(IReadRepository<>), typeof(CachedRepository<>));
+        services.AddScoped(typeof(EfRepository<>));
+
+        services.AddScoped<ISymbolUniquenessChecker, SymbolUniquenessChecker>();
+
+        return services;
     }
 }

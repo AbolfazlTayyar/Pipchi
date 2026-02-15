@@ -11,6 +11,9 @@ public class SymbolConfigurations : BaseEntityConfiguration<Symbol, int>
             .IsRequired()
             .HasMaxLength(ColumnConstants.DEFAULT_NAME_LENGTH);
 
+        builder.HasIndex(x => x.Name)
+            .IsUnique();
+
         builder.Property(x => x.MinPrice)
             .HasPrecision(18, 5);
 

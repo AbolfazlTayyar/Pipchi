@@ -1,4 +1,6 @@
-﻿namespace Pipchi.Contracts.Models.Symbol.Create;
+﻿using Pipchi.Contracts.DTOs;
+
+namespace Pipchi.Contracts.Models.Symbol.Create;
 
 public class CreateSymbolResponse : BaseResponse
 {
@@ -6,5 +8,5 @@ public class CreateSymbolResponse : BaseResponse
     {
     }
 
-    public int MyProperty { get; set; }
+    public SymbolDto SymbolDto { get; set; } = new SymbolDto();
 }

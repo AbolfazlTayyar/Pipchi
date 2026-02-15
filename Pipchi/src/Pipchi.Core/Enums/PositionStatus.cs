@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Pipchi.Core.Enums;
+﻿namespace Pipchi.Core.Enums;
 
 public enum PositionStatus
 {

@@ -5,7 +5,7 @@ using Pipchi.Core.SyncedAggregates;
 
 namespace Pipchi.Infrastructure.Data.Configurations;
 
-public class PositionConfigurations : BaseEntityConfiguration<Position, Guid>
+public class PositionConfigurations : BaseEntityConfiguration<Position>
 {
     protected override void ConfigureEntity(EntityTypeBuilder<Position> builder)
     {

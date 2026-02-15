@@ -11,9 +11,6 @@ public abstract class BaseEntityConfiguration<TEntity, TKey> : IEntityTypeConfig
     {
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Id)
-            .ValueGeneratedNever();
-
         builder.Ignore(x => x.Events);
 
         ConfigureEntity(builder);
@@ -21,4 +18,16 @@ public abstract class BaseEntityConfiguration<TEntity, TKey> : IEntityTypeConfig
 
     // This method can be overridden in derived classes to provide additional configuration specific to the entity.
     protected abstract void ConfigureEntity(EntityTypeBuilder<TEntity> builder);
+}
+
+public abstract class BaseEntityConfiguration<TEntity> : BaseEntityConfiguration<TEntity, Guid>
+    where TEntity : BaseEntity<Guid>
+{
+    public override void Configure(EntityTypeBuilder<TEntity> builder)
+    {
+        base.Configure(builder);
+
+        builder.Property(x => x.Id)
+               .ValueGeneratedNever();
+    }
 }

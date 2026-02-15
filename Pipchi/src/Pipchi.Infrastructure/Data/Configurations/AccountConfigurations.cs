@@ -4,7 +4,7 @@ using Pipchi.Core.AccountAggregate;
 
 namespace Pipchi.Infrastructure.Data.Configurations;
 
-public class AccountConfigurations : BaseEntityConfiguration<Account, Guid>
+public class AccountConfigurations : BaseEntityConfiguration<Account>
 {
     protected override void ConfigureEntity(EntityTypeBuilder<Account> builder)
     {

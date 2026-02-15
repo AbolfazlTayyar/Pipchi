@@ -12,8 +12,8 @@ using Pipchi.Infrastructure.Data;
 namespace Pipchi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260206194030_Initial")]
-    partial class Initial
+    [Migration("20260211092909_AddUniqueIndexToSymbolName")]
+    partial class AddUniqueIndexToSymbolName
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -142,7 +142,10 @@ namespace Pipchi.Infrastructure.Data.Migrations
             modelBuilder.Entity("Pipchi.Core.SyncedAggregates.Symbol", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
@@ -175,6 +178,9 @@ namespace Pipchi.Infrastructure.Data.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Symbols");
                 });
