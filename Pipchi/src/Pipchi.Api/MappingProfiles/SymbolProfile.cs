@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Pipchi.Contracts.DTOs;
+using Pipchi.Api.Models.DTOs;
 using Pipchi.Core.SyncedAggregates;
 
 namespace Pipchi.Api.MappingProfiles;

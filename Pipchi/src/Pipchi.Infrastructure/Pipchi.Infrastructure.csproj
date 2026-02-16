@@ -12,7 +12,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Pipchi.Contracts\Pipchi.Contracts.csproj" />
 		<ProjectReference Include="..\Pipchi.Core\Pipchi.Core.csproj" />
 	</ItemGroup>
 

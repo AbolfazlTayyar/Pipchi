@@ -1,8 +1,8 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Pipchi.Contracts.DTOs;
-using Pipchi.Contracts.Models.Symbol.Create;
-using Pipchi.Core.Interfaces;
+using Pipchi.Api.Models.DTOs;
+using Pipchi.Api.Models.Symbol.Create;
+using Pipchi.Core.SyncedAggregates.Specifications;
 using Pipchi.SharedKernel.Interfaces;
 using IMapper = AutoMapper.IMapper;
 
@@ -11,17 +11,17 @@ namespace Pipchi.Api.Endpoints.Symbol;
 public class Create : Endpoint<CreateSymbolRequest, Results<Ok<CreateSymbolResponse>, Conflict<string>>>
 {
     private readonly IRepository<Core.SyncedAggregates.Symbol> _repository;
-    private readonly ISymbolUniquenessChecker _uniquenessChecker;
+    private readonly IReadRepository<Core.SyncedAggregates.Symbol> _readRepository;
     private readonly ILogger<Create> _logger;
     private readonly IMapper _mapper;
 
     public Create(IRepository<Core.SyncedAggregates.Symbol> repository,
-        ISymbolUniquenessChecker uniquenessChecker,
+        IReadRepository<Core.SyncedAggregates.Symbol> readRepository,
         ILogger<Create> logger,
         IMapper mapper)
     {
         _repository = repository;
-        _uniquenessChecker = uniquenessChecker;
+        _readRepository = readRepository;
         _logger = logger;
         _mapper = mapper;
     }
@@ -42,7 +42,8 @@ public class Create : Endpoint<CreateSymbolRequest, Results<Ok<CreateSymbolRespo
     {
         var response = new CreateSymbolResponse(request.CorrelationId);
 
-        if (!await _uniquenessChecker.IsNameUniqueAsync(request.Name, cancellationToken))
+        var spec = new SymbolByNameSpecification(request.Name);
+        if (await _readRepository.CountAsync(spec, cancellationToken) != 0)
         {
             _logger.LogError("A symbol with the name '{SymbolName}' already exists.", request.Name);
             return TypedResults.Conflict($"A symbol with the name '{request.Name}' already exists.");

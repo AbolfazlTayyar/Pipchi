@@ -1,4 +1,4 @@
-﻿namespace Pipchi.Contracts.Models.Symbol.Delete
+﻿namespace Pipchi.Api.Models.Symbol.Delete
 {
     internal class DeleteSymbolRequest
     {

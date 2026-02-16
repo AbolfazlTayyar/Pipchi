@@ -1,9 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Pipchi.Core.Interfaces;
 using Pipchi.Infrastructure.Data;
-using Pipchi.Infrastructure.Services;
 using Pipchi.SharedKernel.Interfaces;
 
 namespace Pipchi.Infrastructure;
@@ -30,8 +28,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
         services.AddScoped(typeof(IReadRepository<>), typeof(CachedRepository<>));
         services.AddScoped(typeof(EfRepository<>));
-
-        services.AddScoped<ISymbolUniquenessChecker, SymbolUniquenessChecker>();
 
         return services;
     }

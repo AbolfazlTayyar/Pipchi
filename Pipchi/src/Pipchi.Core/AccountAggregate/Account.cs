@@ -1,5 +1,7 @@
 ﻿using Ardalis.GuardClauses;
+using Pipchi.Core.Enums;
 using Pipchi.Core.Interfaces;
+using Pipchi.Core.SyncedAggregates;
 using Pipchi.Core.ValueObjects;
 using Pipchi.SharedKernel;
 using Pipchi.SharedKernel.Interfaces;
@@ -39,11 +41,38 @@ public class Account : BaseEntity<Guid>, IAggregateRoot
         return equity - margin;
     }
 
-    public void AddNewOrder(Order order)
+    public Order PlaceOrder(Symbol symbol,
+        TradeType type,
+        Volume volume,
+        decimal entryPrice,
+        decimal? stopLoss = null,
+        decimal? takeProfit = null)
     {
-        Guard.Against.Null(order, nameof(order));
-        Guard.Against.Default(order.Id, nameof(order.Id));
+        symbol.ValidatePrice(entryPrice);
+        symbol.ValidateVolume(volume.Value);
+
+        if (stopLoss.HasValue)
+            symbol.ValidatePrice(stopLoss.Value);
+
+        if (takeProfit.HasValue)
+            symbol.ValidatePrice(takeProfit.Value);
+
+        var order = new Order(
+            Guid.NewGuid(),
+            Id,
+            symbol.Id,
+            type,
+            volume,
+            entryPrice,
+            stopLoss,
+            takeProfit);
 
         _orders.Add(order);
+
+        //AddDomainEvent(new OrderPlacedEvent(Id, order.Id, symbolId, volume.Value));
+
+        MarkAsUpdated();
+
+        return order;
     }
 }

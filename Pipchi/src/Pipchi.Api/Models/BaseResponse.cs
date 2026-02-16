@@ -1,4 +1,4 @@
-﻿namespace Pipchi.Contracts.Models;
+﻿namespace Pipchi.Api.Models;
 
 public abstract class BaseResponse
 {

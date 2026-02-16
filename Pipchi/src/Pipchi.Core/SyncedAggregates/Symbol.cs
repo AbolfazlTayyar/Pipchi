@@ -1,5 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Pipchi.Core.Exceptions;
+using Pipchi.Core.Exceptions.Volume;
 using Pipchi.SharedKernel;
 using Pipchi.SharedKernel.Interfaces;
 
@@ -31,9 +32,14 @@ public class Symbol : BaseEntity<int>, IAggregateRoot
 
     private decimal NormalizePrice(decimal price) => Math.Round(price, Digits);
 
-    public bool IsValidPrice(decimal price) =>
-         price >= MinPrice && price <= MaxPrice
-               && price == NormalizePrice(price);
+    public void ValidatePrice(decimal price)
+    {
+        if (price < MinPrice || price > MaxPrice)
+            throw new PriceOutOfRangeException($"Price must be between {MinPrice} and {MaxPrice}");
+
+        if (price != NormalizePrice(price))
+            throw new InvalidPriceFormatException($"Price must have {Digits} decimal places");
+    }
 
     public void UpdateName(string name)
     {
@@ -62,7 +68,7 @@ public class Symbol : BaseEntity<int>, IAggregateRoot
         Guard.Against.NegativeOrZero(maxVolume, nameof(maxVolume));
 
         if (minVolume >= maxVolume)
-            throw new InvalidVolumeRangeException();
+            throw new InvalidVolumeRangeException("The specified volume range is invalid.");
 
         MinVolume = minVolume;
         MaxVolume = maxVolume;
@@ -82,8 +88,11 @@ public class Symbol : BaseEntity<int>, IAggregateRoot
         MarkAsUpdated();
     }
 
-    public bool IsValidVolume(decimal volume) =>
-        volume >= MinVolume && volume <= MaxVolume;
+    public void ValidateVolume(decimal volume)
+    {
+        if (volume < MinVolume || volume > MaxVolume)
+            throw new InvalidVolumeException($"Volume must be between {MinVolume} and {MaxVolume}");
+    }
 
     public override string ToString() => Name.ToString();
 }
