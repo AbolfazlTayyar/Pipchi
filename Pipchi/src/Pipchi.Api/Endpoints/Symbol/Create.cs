@@ -2,21 +2,22 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Pipchi.Api.Models.DTOs;
 using Pipchi.Api.Models.Symbol.Create;
+using Pipchi.Core.SyncedAggregates;
 using Pipchi.Core.SyncedAggregates.Specifications;
 using Pipchi.SharedKernel.Interfaces;
 using IMapper = AutoMapper.IMapper;
 
-namespace Pipchi.Api.Endpoints.Symbol;
+namespace Pipchi.Api.SymbolEndpoints;
 
 public class Create : Endpoint<CreateSymbolRequest, Results<Ok<CreateSymbolResponse>, Conflict<string>>>
 {
-    private readonly IRepository<Core.SyncedAggregates.Symbol> _repository;
-    private readonly IReadRepository<Core.SyncedAggregates.Symbol> _readRepository;
+    private readonly IRepository<Symbol> _repository;
+    private readonly IReadRepository<Symbol> _readRepository;
     private readonly ILogger<Create> _logger;
     private readonly IMapper _mapper;
 
-    public Create(IRepository<Core.SyncedAggregates.Symbol> repository,
-        IReadRepository<Core.SyncedAggregates.Symbol> readRepository,
+    public Create(IRepository<Symbol> repository,
+        IReadRepository<Symbol> readRepository,
         ILogger<Create> logger,
         IMapper mapper)
     {
@@ -49,8 +50,8 @@ public class Create : Endpoint<CreateSymbolRequest, Results<Ok<CreateSymbolRespo
             return TypedResults.Conflict($"A symbol with the name '{request.Name}' already exists.");
         }
 
-        var symbol = new Core.SyncedAggregates.Symbol(request.Name, request.Digits, request.MinPrice,
-            request.MaxPrice, request.MinVolume, request.MaxVolume);
+        var symbol = new Symbol(request.Name, request.Digits, request.MinPrice,
+            request.MaxPrice, request.MinVolume, request.MaxVolume, request.MarketOpenTime, request.MarketCloseTime);
 
         symbol = await _repository.AddAsync(symbol);
 

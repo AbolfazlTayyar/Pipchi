@@ -9,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Exceptions\Order\" />
     <Folder Include="ValueObjects\Guards\" />
   </ItemGroup>
 

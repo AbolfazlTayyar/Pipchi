@@ -12,8 +12,8 @@ using Pipchi.Infrastructure.Data;
 namespace Pipchi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260211092909_AddUniqueIndexToSymbolName")]
-    partial class AddUniqueIndexToSymbolName
+    [Migration("20260219085931_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,14 +79,15 @@ namespace Pipchi.Infrastructure.Data.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.HasIndex("SymbolId");
-
                     b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Pipchi.Core.AccountAggregate.Position", b =>
                 {
                     b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AccountId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset?>("ClosedAt")
@@ -132,6 +133,8 @@ namespace Pipchi.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AccountId");
+
                     b.HasIndex("OrderId");
 
                     b.HasIndex("SymbolId");
@@ -152,6 +155,16 @@ namespace Pipchi.Infrastructure.Data.Migrations
 
                     b.Property<int>("Digits")
                         .HasColumnType("int");
+
+                    b.Property<TimeOnly>("MarketCloseTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("time")
+                        .HasDefaultValue(new TimeOnly(23, 59, 59, 999).Add(TimeSpan.FromTicks(9999)));
+
+                    b.Property<TimeOnly>("MarketOpenTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("time")
+                        .HasDefaultValue(new TimeOnly(0, 0, 0));
 
                     b.Property<decimal>("MaxPrice")
                         .HasPrecision(18, 5)
@@ -216,14 +229,8 @@ namespace Pipchi.Infrastructure.Data.Migrations
             modelBuilder.Entity("Pipchi.Core.AccountAggregate.Order", b =>
                 {
                     b.HasOne("Pipchi.Core.AccountAggregate.Account", null)
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Pipchi.Core.SyncedAggregates.Symbol", null)
-                        .WithMany()
-                        .HasForeignKey("SymbolId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -251,6 +258,10 @@ namespace Pipchi.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Pipchi.Core.AccountAggregate.Position", b =>
                 {
+                    b.HasOne("Pipchi.Core.AccountAggregate.Account", null)
+                        .WithMany("Positions")
+                        .HasForeignKey("AccountId");
+
                     b.HasOne("Pipchi.Core.AccountAggregate.Order", null)
                         .WithMany()
                         .HasForeignKey("OrderId")
@@ -283,6 +294,13 @@ namespace Pipchi.Infrastructure.Data.Migrations
 
                     b.Navigation("Volume")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Pipchi.Core.AccountAggregate.Account", b =>
+                {
+                    b.Navigation("Orders");
+
+                    b.Navigation("Positions");
                 });
 #pragma warning restore 612, 618
         }

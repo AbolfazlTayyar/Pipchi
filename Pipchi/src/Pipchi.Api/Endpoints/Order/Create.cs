@@ -1,25 +1,31 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
+using Pipchi.Api.Models.DTOs;
 using Pipchi.Api.Models.Order;
 using Pipchi.Core.AccountAggregate;
-using Pipchi.Core.ValueObjects;
+using Pipchi.Core.SyncedAggregates;
 using Pipchi.SharedKernel.Interfaces;
+using IMapper = AutoMapper.IMapper;
 
-namespace Pipchi.Api.Endpoints.Order;
+namespace Pipchi.Api.OrderEndpoints;
 
 public class Create : Endpoint<CreateOrderRequest, Results<Ok<CreateOrderResponse>, NotFound<string>>>
 {
     private readonly IReadRepository<Account> _accountReadRepository;
     private readonly IRepository<Account> _accountRepository;
-    private readonly IReadRepository<Core.SyncedAggregates.Symbol> _symbolReadRepository;
+    private readonly IReadRepository<Symbol> _symbolReadRepository;
+    private readonly IMapper _mapper;
 
     public Create(IReadRepository<Account> accountReadRepository,
-        IReadRepository<Core.SyncedAggregates.Symbol> symbolReadRepository,
-        IRepository<Account> accountRepository)
+        IReadRepository<Symbol> symbolReadRepository,
+        IRepository<Account> accountRepository,
+        IMapper mapper)
     {
         _accountReadRepository = accountReadRepository;
         _symbolReadRepository = symbolReadRepository;
         _accountRepository = accountRepository;
+        _mapper = mapper;
     }
 
     public override void Configure()
@@ -38,9 +44,6 @@ public class Create : Endpoint<CreateOrderRequest, Results<Ok<CreateOrderRespons
     {
         var response = new CreateOrderResponse(request.CorrelationId);
 
-        //if (!await _marketService.IsMarketOpenAsync(cmd.SymbolId, ct))
-        //    return Result.Invalid("Market is currently closed");
-
         var account = await _accountReadRepository.GetByIdAsync(request.AccountId, cancellationToken);
         if (account == null)
             return TypedResults.NotFound($"Account with id {request.AccountId} not found");
@@ -49,13 +52,11 @@ public class Create : Endpoint<CreateOrderRequest, Results<Ok<CreateOrderRespons
         if (symbol == null)
             return TypedResults.NotFound($"Symbol with id {request.SymbolId} not found");
 
-        symbol.ValidatePrice(request.EntryPrice);
-        symbol.ValidateVolume(request.Volume);
-
-        var volume = new Volume(request.Volume);
-        var order = account.PlaceOrder(symbol, request.Type, volume, request.EntryPrice, request.StopLoss, request.TakeProfit);
+        var order = account.PlaceOrder(symbol, request.Type, request.Volume, request.EntryPrice, request.StopLoss, request.TakeProfit);
 
         await _accountRepository.UpdateAsync(account, cancellationToken);
+
+        response.OrderDto = _mapper.Map<OrderDto>(order);
 
         return TypedResults.Ok(response);
     }

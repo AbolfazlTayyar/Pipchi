@@ -1,5 +1,7 @@
 ﻿using Ardalis.GuardClauses;
+using MediatR;
 using Pipchi.Core.Enums;
+using Pipchi.Core.Exceptions.Account;
 using Pipchi.Core.Interfaces;
 using Pipchi.Core.SyncedAggregates;
 using Pipchi.Core.ValueObjects;
@@ -43,18 +45,21 @@ public class Account : BaseEntity<Guid>, IAggregateRoot
 
     public Order PlaceOrder(Symbol symbol,
         TradeType type,
-        Volume volume,
+        decimal orderVolume,
         decimal entryPrice,
         decimal? stopLoss = null,
         decimal? takeProfit = null)
     {
+        var volume = new Volume(orderVolume);
+
         symbol.ValidatePrice(entryPrice);
         symbol.ValidateVolume(volume.Value);
+        symbol.EnsureMarketOpen(DateTimeOffset.UtcNow);
 
-        if (stopLoss.HasValue)
+        if (stopLoss.HasValue && stopLoss.Value > 0)
             symbol.ValidatePrice(stopLoss.Value);
 
-        if (takeProfit.HasValue)
+        if (takeProfit.HasValue && takeProfit.Value > 0)
             symbol.ValidatePrice(takeProfit.Value);
 
         var order = new Order(

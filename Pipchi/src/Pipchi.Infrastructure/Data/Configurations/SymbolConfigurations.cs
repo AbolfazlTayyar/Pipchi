@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Pipchi.Core.SyncedAggregates;
 
 namespace Pipchi.Infrastructure.Data.Configurations;
@@ -25,5 +26,11 @@ public class SymbolConfigurations : BaseEntityConfiguration<Symbol, int>
 
         builder.Property(x => x.MaxVolume)
             .HasPrecision(18, 2);
+
+        builder.Property(x => x.MarketOpenTime)
+            .HasDefaultValue(TimeOnly.MinValue);
+
+        builder.Property(x => x.MarketCloseTime)
+            .HasDefaultValue(TimeOnly.MaxValue);
     }
 }

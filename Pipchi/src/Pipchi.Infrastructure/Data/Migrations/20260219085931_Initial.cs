@@ -38,6 +38,8 @@ namespace Pipchi.Infrastructure.Data.Migrations
                     MaxPrice = table.Column<decimal>(type: "decimal(18,5)", precision: 18, scale: 5, nullable: false),
                     MinVolume = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     MaxVolume = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    MarketOpenTime = table.Column<TimeOnly>(type: "time", nullable: false, defaultValue: new TimeOnly(0, 0, 0)),
+                    MarketCloseTime = table.Column<TimeOnly>(type: "time", nullable: false, defaultValue: new TimeOnly(23, 59, 59, 999).Add(TimeSpan.FromTicks(9999))),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
@@ -70,12 +72,6 @@ namespace Pipchi.Infrastructure.Data.Migrations
                         principalTable: "Accounts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Orders_Symbols_SymbolId",
-                        column: x => x.SymbolId,
-                        principalTable: "Symbols",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -93,12 +89,18 @@ namespace Pipchi.Infrastructure.Data.Migrations
                     TakeProfit = table.Column<decimal>(type: "decimal(18,5)", precision: 18, scale: 5, nullable: true),
                     Profit = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
                     ClosedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    AccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Positions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Positions_Accounts_AccountId",
+                        column: x => x.AccountId,
+                        principalTable: "Accounts",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Positions_Orders_OrderId",
                         column: x => x.OrderId,
@@ -119,9 +121,9 @@ namespace Pipchi.Infrastructure.Data.Migrations
                 column: "AccountId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Orders_SymbolId",
-                table: "Orders",
-                column: "SymbolId");
+                name: "IX_Positions_AccountId",
+                table: "Positions",
+                column: "AccountId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Positions_OrderId",
@@ -132,6 +134,12 @@ namespace Pipchi.Infrastructure.Data.Migrations
                 name: "IX_Positions_SymbolId",
                 table: "Positions",
                 column: "SymbolId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Symbols_Name",
+                table: "Symbols",
+                column: "Name",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -144,10 +152,10 @@ namespace Pipchi.Infrastructure.Data.Migrations
                 name: "Orders");
 
             migrationBuilder.DropTable(
-                name: "Accounts");
+                name: "Symbols");
 
             migrationBuilder.DropTable(
-                name: "Symbols");
+                name: "Accounts");
         }
     }
 }

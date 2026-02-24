@@ -1,4 +1,6 @@
-﻿namespace Pipchi.Api.Models.Order;
+﻿using Pipchi.Api.Models.DTOs;
+
+namespace Pipchi.Api.Models.Order;
 
 public class CreateOrderResponse : BaseResponse
 {
@@ -7,5 +9,5 @@ public class CreateOrderResponse : BaseResponse
         
     }
 
-    //public OrderDto OrderDto { get; set; } = new();
+    public OrderDto OrderDto { get; set; } = new();
 }

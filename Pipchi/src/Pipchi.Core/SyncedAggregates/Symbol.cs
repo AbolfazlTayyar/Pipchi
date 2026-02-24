@@ -1,5 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Pipchi.Core.Exceptions;
+using Pipchi.Core.Exceptions.Account;
 using Pipchi.Core.Exceptions.Volume;
 using Pipchi.SharedKernel;
 using Pipchi.SharedKernel.Interfaces;
@@ -13,7 +14,9 @@ public class Symbol : BaseEntity<int>, IAggregateRoot
         decimal minPrice,
         decimal maxPrice,
         decimal minVolume,
-        decimal maxVolume)
+        decimal maxVolume,
+        TimeOnly? marketOpenTime = null,
+        TimeOnly? marketCloseTime = null)
     {
         Name = Guard.Against.NullOrEmpty(name, nameof(name));
         Digits = Guard.Against.NegativeOrZero(digits, nameof(digits));
@@ -21,7 +24,11 @@ public class Symbol : BaseEntity<int>, IAggregateRoot
         MaxPrice = Guard.Against.NegativeOrZero(maxPrice, nameof(maxPrice));
         MinVolume = Guard.Against.NegativeOrZero(minVolume, nameof(minVolume));
         MaxVolume = Guard.Against.NegativeOrZero(maxVolume, nameof(maxVolume));
+        MarketOpenTime = marketOpenTime ?? TimeOnly.MinValue;
+        MarketCloseTime = marketCloseTime ?? TimeOnly.MaxValue;
     }
+
+    private Symbol() { }
 
     public string Name { get; private set; }
     public int Digits { get; private set; }  // 5 for EURUSD, 3 for USDJPY
@@ -29,6 +36,8 @@ public class Symbol : BaseEntity<int>, IAggregateRoot
     public decimal MaxPrice { get; private set; }
     public decimal MinVolume { get; private set; }
     public decimal MaxVolume { get; private set; }
+    public TimeOnly MarketOpenTime { get; private set; }
+    public TimeOnly MarketCloseTime { get; private set; }
 
     private decimal NormalizePrice(decimal price) => Math.Round(price, Digits);
 
@@ -92,6 +101,24 @@ public class Symbol : BaseEntity<int>, IAggregateRoot
     {
         if (volume < MinVolume || volume > MaxVolume)
             throw new InvalidVolumeException($"Volume must be between {MinVolume} and {MaxVolume}");
+    }
+
+    public void EnsureMarketOpen(DateTimeOffset checkTime)
+    {
+        var currentDay = checkTime.DayOfWeek;
+        var currentTime = TimeOnly.FromTimeSpan(checkTime.TimeOfDay);
+
+        if (currentDay == DayOfWeek.Saturday || currentDay == DayOfWeek.Sunday)
+            throw new MarketCloseException("Market is closed on weekends");
+
+        bool isWithinTradingHours;
+        if (MarketOpenTime <= MarketCloseTime)
+            isWithinTradingHours = currentTime >= MarketOpenTime && currentTime <= MarketCloseTime;
+        else
+            isWithinTradingHours = currentTime >= MarketOpenTime || currentTime <= MarketCloseTime;
+
+        if (!isWithinTradingHours)
+            throw new MarketCloseException($"Market is closed. Trading hours: {MarketOpenTime} - {MarketCloseTime}");
     }
 
     public override string ToString() => Name.ToString();

@@ -17,12 +17,5 @@ public class AccountConfigurations : BaseEntityConfiguration<Account>
                 .HasMaxLength(3)
                 .IsRequired();
         });
-
-        builder.HasMany<Order>("_orders")
-            .WithOne()
-            .HasForeignKey(x => x.AccountId);
-
-        builder.Ignore(x => x.Orders);
-        builder.Ignore(x => x.Positions);
     }
 }

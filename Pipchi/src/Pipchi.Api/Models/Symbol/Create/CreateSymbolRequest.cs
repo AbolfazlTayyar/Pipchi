@@ -10,4 +10,6 @@ public class CreateSymbolRequest : BaseRequest
     public decimal MaxPrice { get; set; }
     public decimal MinVolume { get; set; }
     public decimal MaxVolume { get; set; }
+    public TimeOnly? MarketOpenTime { get; set; }
+    public TimeOnly? MarketCloseTime { get; set; }
 }

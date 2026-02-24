@@ -9,14 +9,6 @@ public class OrderConfigurations : BaseEntityConfiguration<Order>
 {
     protected override void ConfigureEntity(EntityTypeBuilder<Order> builder)
     {
-        builder.HasOne<Account>()
-            .WithMany()
-            .HasForeignKey(x => x.AccountId);
-
-        builder.HasOne<Symbol>()
-            .WithMany()
-            .HasForeignKey(x => x.SymbolId);
-
         builder.Property(x => x.Type)
             .HasMaxLength(ColumnConstants.DEFAULT_TRADE_TYPE_ENUM_LENGTH)
             .IsRequired();
