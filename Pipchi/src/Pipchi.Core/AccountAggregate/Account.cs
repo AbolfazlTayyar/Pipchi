@@ -1,6 +1,7 @@
 ﻿using Ardalis.GuardClauses;
 using MediatR;
 using Pipchi.Core.Enums;
+using Pipchi.Core.Events;
 using Pipchi.Core.Exceptions.Account;
 using Pipchi.Core.Interfaces;
 using Pipchi.Core.SyncedAggregates;
@@ -62,8 +63,7 @@ public class Account : BaseEntity<Guid>, IAggregateRoot
         if (takeProfit.HasValue && takeProfit.Value > 0)
             symbol.ValidatePrice(takeProfit.Value);
 
-        var order = new Order(
-            Guid.NewGuid(),
+        var order = new Order(Guid.NewGuid(),
             Id,
             symbol.Id,
             type,
@@ -74,10 +74,43 @@ public class Account : BaseEntity<Guid>, IAggregateRoot
 
         _orders.Add(order);
 
-        //AddDomainEvent(new OrderPlacedEvent(Id, order.Id, symbolId, volume.Value));
+        Events.Add(new OrderPlacedEvent(order.Id,
+            order.AccountId,
+            order.SymbolId,
+            order.Volume.Value,
+            order.Type,
+            order.EntryPrice,
+            order.StopLoss,
+            order.TakeProfit));
 
         MarkAsUpdated();
 
         return order;
+    }
+
+    public Position AddPosition(Guid orderId,
+        int symbolId,
+        decimal orderVolume,
+        TradeType type,
+        decimal entryPrice,
+        decimal? stopLoss = null,
+        decimal? takeProfit = null)
+    {
+        var volume = new Volume(orderVolume);
+
+        var position = new Position(Guid.NewGuid(),
+            orderId,
+            symbolId,
+            volume,
+            type,
+            entryPrice,
+            stopLoss,
+            takeProfit);
+
+        _positions.Add(position);
+
+        MarkAsUpdated();
+
+        return position;
     }
 }
