@@ -1,6 +1,7 @@
 ﻿using Ardalis.GuardClauses;
 using Pipchi.Core.Exceptions;
 using Pipchi.Core.Exceptions.Account;
+using Pipchi.Core.Exceptions.Symbol;
 using Pipchi.Core.Exceptions.Volume;
 using Pipchi.SharedKernel;
 using Pipchi.SharedKernel.Interfaces;

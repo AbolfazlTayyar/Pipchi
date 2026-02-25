@@ -1,6 +1,4 @@
-﻿using Pipchi.Api.Models.DTOs;
-
-namespace Pipchi.Api.Models.Symbol.Create;
+﻿namespace Pipchi.Api.Models.Symbol.Create;
 
 public class CreateSymbolResponse : BaseResponse
 {

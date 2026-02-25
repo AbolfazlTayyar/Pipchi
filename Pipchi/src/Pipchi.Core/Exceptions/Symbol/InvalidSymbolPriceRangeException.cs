@@ -1,4 +1,4 @@
-﻿namespace Pipchi.Core.Exceptions;
+﻿namespace Pipchi.Core.Exceptions.Symbol;
 
 public class InvalidSymbolPriceRangeException : Exception
 {

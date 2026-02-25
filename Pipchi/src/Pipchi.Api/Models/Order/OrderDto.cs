@@ -1,7 +1,7 @@
 ﻿using Pipchi.Core.Enums;
 using Pipchi.Core.ValueObjects;
 
-namespace Pipchi.Api.Models.DTOs;
+namespace Pipchi.Api.Models.Order;
 
 public class OrderDto
 {

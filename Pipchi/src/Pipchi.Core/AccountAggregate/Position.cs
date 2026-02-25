@@ -1,6 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Pipchi.Core.Enums;
-using Pipchi.Core.Exceptions;
+using Pipchi.Core.Exceptions.Position;
 using Pipchi.Core.ValueObjects;
 using Pipchi.SharedKernel;
 
@@ -56,33 +56,39 @@ public class Position : BaseEntity<Guid>
 
     public void UpdateStopLoss(decimal stopLoss)
     {
-        Guard.Against.NegativeOrZero(stopLoss, nameof(stopLoss));
+        Guard.Against.Negative(stopLoss, nameof(stopLoss));
 
-        if (Type == TradeType.Buy && stopLoss >= EntryPrice)
-            throw new InvalidPositionPriceRangeException("For Buy positions, StopLoss must be below EntryPrice");
-        else if (Type == TradeType.Sell && stopLoss <= EntryPrice)
-            throw new InvalidPositionPriceRangeException("For Sell positions, StopLoss must be above EntryPrice");
-        
-        StopLoss = stopLoss;
+        if (stopLoss != 0)
+        {
+            if (Type == TradeType.Buy && stopLoss >= EntryPrice)
+                throw new InvalidPositionPriceRangeException("For Buy positions, StopLoss must be below EntryPrice");
+            else if (Type == TradeType.Sell && stopLoss <= EntryPrice)
+                throw new InvalidPositionPriceRangeException("For Sell positions, StopLoss must be above EntryPrice");
 
-        MarkAsUpdated();
+            StopLoss = stopLoss;
 
-        // Add domain event PositionStopLossUpdatedEvent if needed
+            MarkAsUpdated();
+
+            // Add domain event PositionStopLossUpdatedEvent if needed
+        }
     }
 
     public void UpdateTakeProfit(decimal takeProfit)
     {
-        Guard.Against.NegativeOrZero(takeProfit, nameof(takeProfit));
+        Guard.Against.Negative(takeProfit, nameof(takeProfit));
 
-        if (Type == TradeType.Buy && takeProfit <= EntryPrice)
-            throw new InvalidPositionPriceRangeException("For Buy positions, TakeProfit must be above EntryPrice");
-        else if (Type == TradeType.Sell && takeProfit >= EntryPrice)
-            throw new InvalidPositionPriceRangeException("For Sell positions, TakeProfit must be below EntryPrice");
-        
-        TakeProfit = takeProfit;
+        if (takeProfit != 0)
+        {
+            if (Type == TradeType.Buy && takeProfit <= EntryPrice)
+                throw new InvalidPositionPriceRangeException("For Buy positions, TakeProfit must be above EntryPrice");
+            else if (Type == TradeType.Sell && takeProfit >= EntryPrice)
+                throw new InvalidPositionPriceRangeException("For Sell positions, TakeProfit must be below EntryPrice");
 
-        MarkAsUpdated();
+            TakeProfit = takeProfit;
 
-        // Add domain event PositionTakeProfitUpdatedEvent if needed
+            MarkAsUpdated();
+
+            // Add domain event PositionTakeProfitUpdatedEvent if needed
+        }
     }
 }

@@ -1,6 +1,4 @@
-﻿using Pipchi.Api.Models.DTOs;
-
-namespace Pipchi.Api.Models.Order;
+﻿namespace Pipchi.Api.Models.Order;
 
 public class CreateOrderResponse : BaseResponse
 {

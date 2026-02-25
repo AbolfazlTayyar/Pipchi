@@ -3,6 +3,7 @@ using MediatR;
 using Pipchi.Core.Enums;
 using Pipchi.Core.Events;
 using Pipchi.Core.Exceptions.Account;
+using Pipchi.Core.Exceptions.Position;
 using Pipchi.Core.Interfaces;
 using Pipchi.Core.SyncedAggregates;
 using Pipchi.Core.ValueObjects;
@@ -112,5 +113,26 @@ public class Account : BaseEntity<Guid>, IAggregateRoot
         MarkAsUpdated();
 
         return position;
+    }
+
+    public void UpdatePosition(Guid positionId,
+        decimal? stopLoss = null,
+        decimal? takeProfit = null)
+    {
+        var position = _positions.FirstOrDefault(p => p.Id == positionId);
+        if (position == null)
+            throw new PositionNotFoundException($"Position with id {positionId} not found");
+
+        if (stopLoss.HasValue)
+        {
+            position.UpdateStopLoss(stopLoss.Value);
+            MarkAsUpdated();
+        }
+
+        if (takeProfit.HasValue)
+        {
+            position.UpdateTakeProfit(takeProfit.Value);
+            MarkAsUpdated();
+        }
     }
 }

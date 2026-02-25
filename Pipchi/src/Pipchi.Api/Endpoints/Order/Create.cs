@@ -1,7 +1,6 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using Pipchi.Api.Models.DTOs;
 using Pipchi.Api.Models.Order;
 using Pipchi.Core.AccountAggregate;
 using Pipchi.Core.SyncedAggregates;

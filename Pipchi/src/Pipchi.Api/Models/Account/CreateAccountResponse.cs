@@ -1,6 +1,4 @@
-﻿using Pipchi.Api.Models.DTOs;
-
-namespace Pipchi.Api.Models.Account;
+﻿namespace Pipchi.Api.Models.Account;
 
 public class CreateAccountResponse : BaseResponse
 {

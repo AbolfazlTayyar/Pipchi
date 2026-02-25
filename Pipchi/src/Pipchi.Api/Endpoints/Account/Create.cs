@@ -1,6 +1,5 @@
 ﻿using FastEndpoints;
 using Pipchi.Api.Models.Account;
-using Pipchi.Api.Models.DTOs;
 using Pipchi.Core.AccountAggregate;
 using Pipchi.Core.ValueObjects;
 using Pipchi.SharedKernel.Interfaces;

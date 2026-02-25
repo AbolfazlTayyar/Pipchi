@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Pipchi.Api.Models.DTOs;
+using Pipchi.Api.Models.Order;
 using Pipchi.Core.AccountAggregate;
 
 namespace Pipchi.Api.MappingProfiles;

@@ -1,5 +1,13 @@
-﻿namespace Pipchi.Api.Models.Position;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Pipchi.Core.AccountAggregate;
 
-public class EditPositionResponse
+namespace Pipchi.Api.Models.Position;
+
+public class EditPositionResponse : BaseResponse
 {
+    public EditPositionResponse(Guid correlationId) : base(correlationId)
+    {
+    }
+
+    public PositionDto PositionDto { get; set; } = new();
 }

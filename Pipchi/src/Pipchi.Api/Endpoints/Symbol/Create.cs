@@ -1,6 +1,6 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Pipchi.Api.Models.DTOs;
+using Pipchi.Api.Models.Symbol;
 using Pipchi.Api.Models.Symbol.Create;
 using Pipchi.Core.SyncedAggregates;
 using Pipchi.Core.SyncedAggregates.Specifications;

@@ -1,4 +1,4 @@
-﻿namespace Pipchi.Api.Models.DTOs;
+﻿namespace Pipchi.Api.Models.Symbol;
 
 public class SymbolDto
 {

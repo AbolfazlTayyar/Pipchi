@@ -1,4 +1,4 @@
-﻿namespace Pipchi.Api.Models.DTOs;
+﻿namespace Pipchi.Api.Models.Account;
 
 public class AccountDto
 {
