@@ -3,6 +3,8 @@
   <Folder Name="/Pipchi/src/">
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
+    <File Path="docker-compose.override.yml" />
+    <File Path="docker-compose.yml" />
   </Folder>
   <Folder Name="/Pipchi/src/Pipchi.Api/">
     <Project Path="Pipchi/src/Pipchi.Api/Pipchi.Api.csproj" Id="38aec435-b0d8-41cf-9043-dbc78d1660f4" />
@@ -12,6 +14,10 @@
   </Folder>
   <Folder Name="/Pipchi/src/Pipchi.Infrastructure/">
     <Project Path="Pipchi/src/Pipchi.Infrastructure/Pipchi.Infrastructure.csproj" Id="d8550c64-f00a-450f-b1d8-557cf67a8ed8" />
+  </Folder>
+  <Folder Name="/Pipchi/tests/" />
+  <Folder Name="/Pipchi/tests/Pipchi.IntegrationTests/">
+    <Project Path="Pipchi/tests/Pipchi.IntegrationTests/Pipchi.IntegrationTests.csproj" Id="77e8b89d-be11-4503-81c9-071769abd63a" />
   </Folder>
   <Folder Name="/SharedKernel/" />
   <Folder Name="/SharedKernel/src/" />

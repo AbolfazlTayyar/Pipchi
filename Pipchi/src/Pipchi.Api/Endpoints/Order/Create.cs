@@ -1,9 +1,15 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using Pipchi.Api.Models.Order;
 using Pipchi.Core.AccountAggregate;
+using Pipchi.Core.AccountAggregate.Specifications;
+using Pipchi.Core.Exceptions.Account;
+using Pipchi.Core.Interfaces;
 using Pipchi.Core.SyncedAggregates;
+using Pipchi.Core.ValueObjects;
+using Pipchi.Infrastructure.Implementations;
 using Pipchi.SharedKernel.Interfaces;
 using IMapper = AutoMapper.IMapper;
 
@@ -43,7 +49,8 @@ public class Create : Endpoint<CreateOrderRequest, Results<Ok<CreateOrderRespons
     {
         var response = new CreateOrderResponse(request.CorrelationId);
 
-        var account = await _accountReadRepository.GetByIdAsync(request.AccountId, cancellationToken);
+        var spec = new AccountByIdWithPositionsSpecification(request.AccountId);
+        var account = await _accountRepository.FirstOrDefaultAsync(spec, cancellationToken);
         if (account == null)
             return TypedResults.NotFound($"Account with id {request.AccountId} not found");
 
@@ -51,7 +58,9 @@ public class Create : Endpoint<CreateOrderRequest, Results<Ok<CreateOrderRespons
         if (symbol == null)
             return TypedResults.NotFound($"Symbol with id {request.SymbolId} not found");
 
-        var order = account.PlaceOrder(symbol, request.Type, request.Volume, request.EntryPrice, request.StopLoss, request.TakeProfit);
+        var order = account.PlaceOrder(symbol, request.Type, request.Volume,
+            request.EntryPrice, DateTimeOffset.UtcNow, request.StopLoss,
+            request.TakeProfit);
 
         await _accountRepository.UpdateAsync(account, cancellationToken);
 

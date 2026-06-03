@@ -8,8 +8,8 @@ public class Money : ValueObject
 {
     public Money(decimal amount, string currency)
     {
-        Amount = Guard.Against.NegativeOrZero(amount, nameof(amount));
-        Currency = currency;
+        Amount = Guard.Against.Negative(amount, nameof(amount));
+        Currency = Guard.Against.NullOrWhiteSpace(currency, nameof(currency));
     }
 
     public string Currency { get; init; }

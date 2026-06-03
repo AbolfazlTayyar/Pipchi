@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Pipchi.Api.Models.Symbol;
 using Pipchi.Api.Models.Symbol.Create;
+using Pipchi.Core.Interfaces;
 using Pipchi.Core.SyncedAggregates;
 using Pipchi.Core.SyncedAggregates.Specifications;
 using Pipchi.SharedKernel.Interfaces;
@@ -12,6 +13,7 @@ namespace Pipchi.Api.SymbolEndpoints;
 public class Create : Endpoint<CreateSymbolRequest, Results<Ok<CreateSymbolResponse>, Conflict<string>>>
 {
     private readonly IRepository<Symbol> _repository;
+    private readonly ISymbolCacheService _symbolCacheService;
     private readonly IReadRepository<Symbol> _readRepository;
     private readonly ILogger<Create> _logger;
     private readonly IMapper _mapper;
@@ -19,12 +21,14 @@ public class Create : Endpoint<CreateSymbolRequest, Results<Ok<CreateSymbolRespo
     public Create(IRepository<Symbol> repository,
         IReadRepository<Symbol> readRepository,
         ILogger<Create> logger,
-        IMapper mapper)
+        IMapper mapper,
+        ISymbolCacheService symbolCacheService)
     {
         _repository = repository;
         _readRepository = readRepository;
         _logger = logger;
         _mapper = mapper;
+        _symbolCacheService = symbolCacheService;
     }
 
     public override void Configure()
@@ -51,9 +55,11 @@ public class Create : Endpoint<CreateSymbolRequest, Results<Ok<CreateSymbolRespo
         }
 
         var symbol = new Symbol(request.Name, request.Digits, request.MinPrice,
-            request.MaxPrice, request.MinVolume, request.MaxVolume, request.MarketOpenTime, request.MarketCloseTime);
+            request.MaxPrice, request.MinVolume, request.MaxVolume, request.VolumeStep, request.ContractSize ,request.MarketOpenTime, request.MarketCloseTime);
 
         symbol = await _repository.AddAsync(symbol);
+
+        await _symbolCacheService.InvalidateAsync(symbol.Id);
 
         _logger.LogInformation("Created new symbol with id {SymbolId} and name {SymbolName}", symbol.Id, symbol.Name);
 

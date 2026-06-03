@@ -22,10 +22,13 @@ public class SymbolConfigurations : BaseEntityConfiguration<Symbol, int>
             .HasPrecision(18, 5);
 
         builder.Property(x => x.MinVolume)
-            .HasPrecision(18, 2);
+            .HasPrecision(18, 8);
 
         builder.Property(x => x.MaxVolume)
-            .HasPrecision(18, 2);
+            .HasPrecision(18, 8);
+
+        builder.Property(x => x.VolumeStep)
+            .HasPrecision(18, 8);
 
         builder.Property(x => x.MarketOpenTime)
             .HasDefaultValue(TimeOnly.MinValue);

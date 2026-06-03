@@ -10,6 +10,7 @@ public class OrderPlacedEvent : BaseDomainEvent
     public int SymbolId { get; }
     public decimal Volume { get; }
     public TradeType Type { get; }
+    public int ContractSize { get; }
     public decimal EntryPrice { get; }
     public decimal? StopLoss { get; }
     public decimal? TakeProfit { get; }
@@ -19,6 +20,7 @@ public class OrderPlacedEvent : BaseDomainEvent
         int symbolId,
         decimal volume,
         TradeType type,
+        int contractSize,
         decimal entryPrice,
         decimal? stopLoss,
         decimal? takeProfit)
@@ -28,6 +30,7 @@ public class OrderPlacedEvent : BaseDomainEvent
         SymbolId = symbolId;
         Volume = volume;
         Type = type;
+        ContractSize = contractSize;
         EntryPrice = entryPrice;
         StopLoss = stopLoss;
         TakeProfit = takeProfit;

@@ -1,6 +1,5 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Pipchi.Api.Models.Account;
 using Pipchi.Api.Models.Position;
 using Pipchi.Core.AccountAggregate;
 using Pipchi.Core.AccountAggregate.Specifications;
@@ -11,10 +10,10 @@ namespace Pipchi.Api.Endpoints.Position;
 
 public class Edit : Endpoint<EditPositionRequest, Results<Ok<EditPositionResponse>, NotFound<string>>>
 {
-    private readonly IRepository<Account> _accountRepository;
+    private readonly IRepository<Core.AccountAggregate.Account> _accountRepository;
     private readonly IMapper _mapper;
 
-    public Edit(IRepository<Account> accountRepository,
+    public Edit(IRepository<Core.AccountAggregate.Account> accountRepository,
         IMapper mapper)
     {
         _accountRepository = accountRepository;

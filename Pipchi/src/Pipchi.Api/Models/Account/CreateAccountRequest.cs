@@ -6,4 +6,5 @@ public class CreateAccountRequest : BaseRequest
 
     public string Currency { get; set; }
     public decimal Balance { get; set; }
+    public int Leverage { get; set; }
 }

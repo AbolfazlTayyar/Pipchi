@@ -1,3 +1,4 @@
+using Elastic.Clients.Elasticsearch;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Pipchi.Api;
@@ -9,6 +10,8 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers();
+
 builder.Services.AddMemoryCache();
 
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -19,6 +22,17 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 var assemblies = new Assembly[] { typeof(Program).Assembly, typeof(ApplicationDbContext).Assembly, typeof(Account).Assembly };
 builder.Services.AddMediatR(config => config.RegisterServicesFromAssemblies(assemblies));
+
+#region Elastic Search
+builder.Services.AddSingleton<ElasticsearchClient>(sp =>
+{
+    var uri = builder.Configuration["Elasticsearch:Uri"];
+
+    var settings = new ElasticsearchClientSettings(new Uri(uri));
+
+    return new ElasticsearchClient(settings);
+});
+#endregion
 
 var app = builder.Build();
 
@@ -32,5 +46,13 @@ app.UseSwaggerUiRedirect();
 app.UseHttpsRedirection();
 
 app.UseFastEndpoints().UseSwaggerGen();
+
+app.MapControllers();
+
+//using (var scope = app.Services.CreateScope())
+//{
+//    var service = scope.ServiceProvider.GetRequiredService<AccountSearchService>();
+//    await ApplicationDbContextSeed.SeedAndIndexAsync(builder.Configuration.GetConnectionString("DefaultConnection"), service);
+//}
 
 app.Run();

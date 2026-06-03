@@ -4,6 +4,7 @@ using Pipchi.Core.Exceptions.Account;
 using Pipchi.Core.Exceptions.Symbol;
 using Pipchi.Core.Exceptions.Volume;
 using Pipchi.SharedKernel;
+using Pipchi.SharedKernel.Extensions;
 using Pipchi.SharedKernel.Interfaces;
 
 namespace Pipchi.Core.SyncedAggregates;
@@ -16,6 +17,8 @@ public class Symbol : BaseEntity<int>, IAggregateRoot
         decimal maxPrice,
         decimal minVolume,
         decimal maxVolume,
+        decimal volumeStep,
+        int contractSize,
         TimeOnly? marketOpenTime = null,
         TimeOnly? marketCloseTime = null)
     {
@@ -25,6 +28,8 @@ public class Symbol : BaseEntity<int>, IAggregateRoot
         MaxPrice = Guard.Against.NegativeOrZero(maxPrice, nameof(maxPrice));
         MinVolume = Guard.Against.NegativeOrZero(minVolume, nameof(minVolume));
         MaxVolume = Guard.Against.NegativeOrZero(maxVolume, nameof(maxVolume));
+        VolumeStep = Guard.Against.NegativeOrZero(volumeStep, nameof(volumeStep));
+        ContractSize = Guard.Against.NegativeOrZero(contractSize, nameof(contractSize));
         MarketOpenTime = marketOpenTime ?? TimeOnly.MinValue;
         MarketCloseTime = marketCloseTime ?? TimeOnly.MaxValue;
     }
@@ -37,18 +42,26 @@ public class Symbol : BaseEntity<int>, IAggregateRoot
     public decimal MaxPrice { get; private set; }
     public decimal MinVolume { get; private set; }
     public decimal MaxVolume { get; private set; }
+    public decimal VolumeStep { get; private set; }
+    public int ContractSize { get; private set; }
     public TimeOnly MarketOpenTime { get; private set; }
     public TimeOnly MarketCloseTime { get; private set; }
 
     private decimal NormalizePrice(decimal price) => Math.Round(price, Digits);
 
-    public void ValidatePrice(decimal price)
+    private decimal NormalizeVolume(decimal volume)
+    {
+        var steps = Math.Round(volume / VolumeStep);
+        return steps * VolumeStep;
+    }
+
+    public void ValidatePrice(decimal price, string parameterName)
     {
         if (price < MinPrice || price > MaxPrice)
-            throw new PriceOutOfRangeException($"Price must be between {MinPrice} and {MaxPrice}");
+            throw new PriceOutOfRangeException($"{parameterName} Price must be between {MinPrice} and {MaxPrice}");
 
         if (price != NormalizePrice(price))
-            throw new InvalidPriceFormatException($"Price must have {Digits} decimal places");
+            throw new InvalidPriceFormatException($"{parameterName} Price must have {Digits} decimal places");
     }
 
     public void UpdateName(string name)
@@ -101,7 +114,10 @@ public class Symbol : BaseEntity<int>, IAggregateRoot
     public void ValidateVolume(decimal volume)
     {
         if (volume < MinVolume || volume > MaxVolume)
-            throw new InvalidVolumeException($"Volume must be between {MinVolume} and {MaxVolume}");
+            throw new InvalidVolumeException($"Volume must be between {MinVolume.Trimmed()} and {MaxVolume.Trimmed()}");
+
+        if (volume != NormalizeVolume(volume))
+            throw new InvalidVolumeException($"Volume must have {VolumeStep.Trimmed()} volume step");
     }
 
     public void EnsureMarketOpen(DateTimeOffset checkTime)
@@ -109,8 +125,8 @@ public class Symbol : BaseEntity<int>, IAggregateRoot
         var currentDay = checkTime.DayOfWeek;
         var currentTime = TimeOnly.FromTimeSpan(checkTime.TimeOfDay);
 
-        if (currentDay == DayOfWeek.Saturday || currentDay == DayOfWeek.Sunday)
-            throw new MarketCloseException("Market is closed on weekends");
+        //if (currentDay == DayOfWeek.Saturday || currentDay == DayOfWeek.Sunday)
+        //    throw new MarketCloseException($"Market for {Name} is closed on weekends");
 
         bool isWithinTradingHours;
         if (MarketOpenTime <= MarketCloseTime)
@@ -119,7 +135,7 @@ public class Symbol : BaseEntity<int>, IAggregateRoot
             isWithinTradingHours = currentTime >= MarketOpenTime || currentTime <= MarketCloseTime;
 
         if (!isWithinTradingHours)
-            throw new MarketCloseException($"Market is closed. Trading hours: {MarketOpenTime} - {MarketCloseTime}");
+            throw new MarketCloseException($"Market for {Name} is closed. Trading hours: {MarketOpenTime} - {MarketCloseTime}");
     }
 
     public override string ToString() => Name.ToString();

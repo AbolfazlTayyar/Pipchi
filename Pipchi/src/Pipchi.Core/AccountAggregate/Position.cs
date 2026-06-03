@@ -1,6 +1,7 @@
 ﻿using Ardalis.GuardClauses;
 using Pipchi.Core.Enums;
 using Pipchi.Core.Exceptions.Position;
+using Pipchi.Core.SyncedAggregates;
 using Pipchi.Core.ValueObjects;
 using Pipchi.SharedKernel;
 
@@ -8,11 +9,14 @@ namespace Pipchi.Core.AccountAggregate;
 
 public class Position : BaseEntity<Guid>
 {
+    private static readonly Random _random = new();
+
     public Position(Guid id,
         Guid orderId,
         int symbolId,
         Volume volume,
         TradeType tradeType,
+        int contractSize,
         decimal entryPrice,
         decimal? stopLoss = null,
         decimal? takeProfit = null,
@@ -23,6 +27,7 @@ public class Position : BaseEntity<Guid>
         SymbolId = Guard.Against.Default(symbolId, nameof(symbolId));
         Volume = volume;
         Type = tradeType;
+        ContractSize = Guard.Against.NegativeOrZero(contractSize, nameof(contractSize));
         Status = PositionStatus.Open;
         EntryPrice = Guard.Against.NegativeOrZero(entryPrice, nameof(entryPrice));
         StopLoss = stopLoss;
@@ -37,25 +42,30 @@ public class Position : BaseEntity<Guid>
     public Volume Volume { get; private set; }
     public TradeType Type { get; private set; }
     public PositionStatus Status { get; private set; }
+    public int ContractSize { get; private set; }
     public decimal EntryPrice { get; private set; }
     public decimal? StopLoss { get; private set; }
     public decimal? TakeProfit { get; private set; }
     public decimal? Profit { get; private set; }
     public DateTimeOffset? ClosedAt { get; private set; }
 
-    public void ClosePosition(decimal profit)
+    public void Close(Symbol symbol)
     {
-        Guard.Against.NegativeOrZero(profit, nameof(profit));
+        EnsureNotClosed();
 
+        symbol.EnsureMarketOpen(DateTimeOffset.UtcNow);
+
+        Profit = CalculateProfitLoss();
         Status = PositionStatus.Closed;
         ClosedAt = DateTimeOffset.UtcNow;
-        Profit = profit;
 
-        // Add domain event PositionClosedEvent if needed
+        MarkAsUpdated();
     }
 
     public void UpdateStopLoss(decimal stopLoss)
     {
+        EnsureNotClosed();
+
         Guard.Against.Negative(stopLoss, nameof(stopLoss));
 
         if (stopLoss != 0)
@@ -75,6 +85,8 @@ public class Position : BaseEntity<Guid>
 
     public void UpdateTakeProfit(decimal takeProfit)
     {
+        EnsureNotClosed();
+
         Guard.Against.Negative(takeProfit, nameof(takeProfit));
 
         if (takeProfit != 0)
@@ -90,5 +102,20 @@ public class Position : BaseEntity<Guid>
 
             // Add domain event PositionTakeProfitUpdatedEvent if needed
         }
+    }
+
+    private decimal CalculateProfitLoss()
+    {
+        var percentChange = (decimal)(_random.NextDouble() * 0.1 - 0.05);
+        var priceChange = EntryPrice * percentChange;
+        var profitLoss = priceChange * Volume.Value * 100000m;
+
+        return Math.Round(Type == TradeType.Sell ? -profitLoss : profitLoss, 2);
+    }
+
+    private void EnsureNotClosed()
+    {
+        if (Status == PositionStatus.Closed)
+            throw new PositionClosedException($"Position with id {Id} is closed and this operation cannot be performed.");
     }
 }

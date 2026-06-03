@@ -1,27 +1,33 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Pipchi.Core.AccountAggregate;
 using Pipchi.Core.SyncedAggregates;
 using Pipchi.Infrastructure.Data.Extensions;
+using Pipchi.Infrastructure.Outbox;
 using Pipchi.SharedKernel;
+using Pipchi.SharedKernel.Exceptions;
 using System.Reflection;
 
 namespace Pipchi.Infrastructure.Data;
 
 public class ApplicationDbContext : DbContext
 {
-    private readonly IMediator _mediator;
+    private static readonly new JsonSerializerSettings jsonSerializerSettings = new()
+    {
+        TypeNameHandling = TypeNameHandling.All
+    };
 
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IMediator mediator)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
-        _mediator = mediator;
     }
 
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<Position> Positions { get; set; }
     public DbSet<Symbol> Symbols { get; set; }
+    public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -37,28 +43,37 @@ public class ApplicationDbContext : DbContext
         configurationBuilder.Properties<Enum>().HaveConversion<string>();
     }
 
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        int result = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-        if (_mediator == null) return result;
-
-        var entitiesWithEvents = ChangeTracker
-            .Entries()
-            .Select(e => e.Entity as BaseEntity<Guid>)
-            .Where(e => e?.Events != null && e.Events.Any())
-            .ToArray();
-
-        foreach (var entity in entitiesWithEvents)
+        try
         {
-            var events = entity.Events.ToArray();
-            entity.Events.Clear();
-            foreach (var domainEvent in events)
-            {
-                await _mediator.Publish(domainEvent).ConfigureAwait(false);
-            }
-        }
+            AddDomainEventsAsOutboxMessages();  
 
-        return result;
+            int result = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            return result;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConcurrencyException("Concurrency exception occured.", ex);
+        }
+    }
+
+    private void AddDomainEventsAsOutboxMessages()
+    {
+        var now = DateTime.UtcNow;
+
+        var outboxMessages = ChangeTracker
+            .Entries<BaseEntity<Guid>>()
+            .Select(e => e.Entity)
+            .SelectMany(e => e.Events)
+            .Select(e => new OutboxMessage(
+                Guid.NewGuid(),
+                now,
+                e.GetType().Name,
+                JsonConvert.SerializeObject(e, jsonSerializerSettings)))
+            .ToList();
+
+        AddRange(outboxMessages);
     }
 }

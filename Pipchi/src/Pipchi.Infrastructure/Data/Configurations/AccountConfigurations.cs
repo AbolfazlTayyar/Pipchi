@@ -17,5 +17,8 @@ public class AccountConfigurations : BaseEntityConfiguration<Account>
                 .HasMaxLength(3)
                 .IsRequired();
         });
+
+        builder.Property<uint>("Version")
+            .IsRowVersion();
     }
 }

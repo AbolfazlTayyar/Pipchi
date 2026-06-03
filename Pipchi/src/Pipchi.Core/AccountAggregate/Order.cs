@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using Pipchi.Core.AccountAggregate.Guards;
 using Pipchi.Core.Enums;
 using Pipchi.Core.Exceptions;
 using Pipchi.Core.ValueObjects;
@@ -23,8 +24,8 @@ public class Order : BaseEntity<Guid>
         Type = orderType;
         EntryPrice = Guard.Against.NegativeOrZero(entryPrice, nameof(entryPrice));
         Volume = volume;
-        StopLoss = stopLoss;
-        TakeProfit = takeProfit;
+        StopLoss = Guard.Against.InvalidStopLoss(orderType, stopLoss, entryPrice);
+        TakeProfit = Guard.Against.InvalidTakeProfit(orderType, takeProfit, entryPrice);
     }
 
     private Order() { } // For EF Core

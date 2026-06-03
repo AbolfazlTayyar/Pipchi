@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Pipchi.Core.AccountAggregate;
-using Pipchi.Core.SyncedAggregates;
 
 namespace Pipchi.Infrastructure.Data.Configurations;
 

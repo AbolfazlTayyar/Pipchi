@@ -26,6 +26,7 @@ public class OrderPlacedEventHandler : INotificationHandler<OrderPlacedEvent>
             notification.SymbolId,
             notification.Volume,
             notification.Type,
+            notification.ContractSize,
             notification.EntryPrice,
             notification.StopLoss,
             notification.TakeProfit);
