@@ -1,28 +1,14 @@
 services:
-  api:
+  pipchi.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PipchiDb;User Id=sa;Password=Admin@1234;TrustServerCertificate=True;
-      - Redis__ConnectionString=redis:6379
-      - Elasticsearch__Uri=http://elasticsearch:9200
+      - ASPNETCORE_HTTP_PORTS=5000
+      - ASPNETCORE_HTTPS_PORTS=5001
     ports:
-      - "8080"
-      - "8081"
+      - "5000:5000"
+      - "5001:5001"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
-    depends_on:
-      sqlserver:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
-    networks:
-      - app-net
-
-networks:
-  app-net:
-    external: true
-    name: pipchi_app-net
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro

@@ -2,6 +2,7 @@
 using Pipchi.Api.Models.Account;
 using Pipchi.Core.AccountAggregate;
 using Pipchi.Core.ValueObjects;
+using Pipchi.Infrastructure.Elasticsearch;
 using Pipchi.SharedKernel.Interfaces;
 using IMapper = AutoMapper.IMapper;
 
@@ -10,13 +11,16 @@ namespace Pipchi.Api.AccountEndpoints;
 public class Create : Endpoint<CreateAccountRequest, CreateAccountResponse>
 {
     private readonly IRepository<Account> _repository;
+    private readonly AccountSearchService _seachService;
     private readonly IMapper _mapper;
 
     public Create(IRepository<Account> repository,
-        IMapper mapper)
+        IMapper mapper,
+        AccountSearchService seachService)
     {
         _repository = repository;
         _mapper = mapper;
+        _seachService = seachService;
     }
 
     public override void Configure()
@@ -38,6 +42,9 @@ public class Create : Endpoint<CreateAccountRequest, CreateAccountResponse>
         var balance = new Money(request.Balance, request.Currency);
 
         var account = await _repository.AddAsync(new Account(Guid.NewGuid(), balance, request.Leverage), cancellationToken);
+
+        // we need to use retry policies and outbox pattern here
+        await _seachService.IndexAsync(account, cancellationToken);
 
         response.AccountDto = _mapper.Map<AccountDto>(account);
 

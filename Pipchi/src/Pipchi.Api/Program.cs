@@ -28,7 +28,12 @@ builder.Services.AddSingleton<ElasticsearchClient>(sp =>
 {
     var uri = builder.Configuration["Elasticsearch:Uri"];
 
-    var settings = new ElasticsearchClientSettings(new Uri(uri));
+    var settings = new ElasticsearchClientSettings(new Uri(uri))
+#if DEBUG
+        .EnableDebugMode()
+        .DisableDirectStreaming();
+#endif
+    ;
 
     return new ElasticsearchClient(settings);
 });
@@ -52,7 +57,7 @@ app.MapControllers();
 //using (var scope = app.Services.CreateScope())
 //{
 //    var service = scope.ServiceProvider.GetRequiredService<AccountSearchService>();
-//    await ApplicationDbContextSeed.SeedAndIndexAsync(builder.Configuration.GetConnectionString("DefaultConnection"), service);
+//    await ApplicationDbContextSeed.SeedAndIndexAsync(builder.Configuration.GetConnectionString("Database"), service);
 //}
 
 app.Run();

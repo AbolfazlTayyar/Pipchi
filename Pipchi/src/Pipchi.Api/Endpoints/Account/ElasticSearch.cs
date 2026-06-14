@@ -4,11 +4,11 @@ using Pipchi.Infrastructure.Elasticsearch;
 
 [ApiController]
 [Route("api/accounts")]
-public class Search : ControllerBase
+public class ElasticSearch : ControllerBase
 {
     private readonly AccountSearchService _service;
 
-    public Search(AccountSearchService service)
+    public ElasticSearch(AccountSearchService service)
     {
         _service = service;
     }

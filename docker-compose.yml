@@ -1,15 +1,19 @@
-﻿services:
+services:
 
-  api:
+  pipchi.api:
     build:
         context: .
         dockerfile: Pipchi/src/Pipchi.Api/Dockerfile
+    container_name: pipchi.api
     ports:
-      - "5000:8080"
+        - "5000:5000"
+        - "5001:5001" 
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PipchiDb;User Id=sa;Password=Admin@1234;TrustServerCertificate=True;
-      - Redis__ConnectionString=redis:6379
+      # - ConnectionStrings__Database=Server=sqlserver,1433;Database=PipchiDb;User Id=sa;Password=Admin@1234;TrustServerCertificate=True;
+      - ConnectionStrings__Database=Server=sqlserver,1433;Database=PipchiDb;User Id=sa;Password=Admin@1234;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=False;
+      # - Redis__ConnectionString=redis:6379
+      - ConnectionStrings__Cache=redis:6379
       - Elasticsearch__Uri=http://elasticsearch:9200
     depends_on:
       sqlserver:
@@ -23,6 +27,7 @@
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
     environment:
       SA_PASSWORD: "Admin@1234"
       ACCEPT_EULA: "Y"
@@ -40,6 +45,8 @@
 
   redis:
     image: redis:7-alpine
+    container_name: redis
+    # restart: always
     ports:
       - "6379:6379"
     volumes:
@@ -53,6 +60,7 @@
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -71,6 +79,7 @@
 
   kibana:
     image: docker.arvancloud.ir/library/kibana:8.13.0
+    container_name: kibana
     ports:
       - "5601:5601"
     environment:

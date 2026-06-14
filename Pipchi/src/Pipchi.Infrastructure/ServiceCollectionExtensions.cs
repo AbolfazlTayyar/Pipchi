@@ -7,7 +7,6 @@ using Pipchi.Infrastructure.Elasticsearch;
 using Pipchi.Infrastructure.Outbox;
 using Pipchi.SharedKernel.Interfaces;
 using Quartz;
-using StackExchange.Redis;
 
 
 namespace Pipchi.Infrastructure;
@@ -19,7 +18,7 @@ public static class ServiceCollectionExtensions
         services.AddDatabase(configuration)
             .AddServices()
             .AddBackgroundJobs(configuration)
-            .AddRedis()
+            .AddRedis(configuration)
             .AddElasticSearch();
 
         return services;
@@ -27,7 +26,7 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        string connectionString = configuration.GetConnectionString("DefaultConnection")!;
+        string connectionString = configuration.GetConnectionString("Database")!;
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
@@ -61,18 +60,11 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddRedis(this IServiceCollection services)
+    private static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<IConnectionMultiplexer>(sp =>
+        services.AddStackExchangeRedisCache(options =>
         {
-            var config = sp.GetRequiredService<IConfiguration>();
-            var connStr = config["Redis__ConnectionString"] ?? "localhost:6379";
-
-            // Parse so we can safely append abortConnect=false
-            var options = ConfigurationOptions.Parse(connStr);
-            options.AbortOnConnectFail = false;
-
-            return ConnectionMultiplexer.Connect(options);
+            options.Configuration = configuration.GetConnectionString("Cache");
         });
 
         services.AddScoped<ISymbolCacheService, SymbolCacheService>();

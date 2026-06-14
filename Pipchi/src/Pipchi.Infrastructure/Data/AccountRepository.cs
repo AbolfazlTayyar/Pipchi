@@ -31,4 +31,41 @@ public class AccountRepository : RepositoryBase<Account>, IAccountRepository
             .Take(pageSize)
             .ToListAsync(ct);
     }
+
+    public Task<List<Account>> SearchAsync(
+        string currency,
+        decimal? minBalance,
+        decimal? maxBalance,
+        int? leverage,
+        DateTimeOffset? createdFrom,
+        DateTimeOffset? createdTo,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = DbContext.Set<Account>().AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrEmpty(currency))
+            query = query.Where(a => a.Balance.Currency == currency.ToUpperInvariant());
+
+        if (leverage.HasValue)
+            query = query.Where(a => a.Leverage == leverage.Value);
+
+        if (minBalance > 0)
+            query = query.Where(a => a.Balance.Amount >= minBalance);
+
+        if (maxBalance > 0)
+            query = query.Where(a => a.Balance.Amount <= maxBalance);
+
+        if (createdFrom.HasValue)
+            query = query.Where(a => a.CreatedAt >= createdFrom.Value.UtcDateTime);
+
+        if (createdTo.HasValue)
+            query = query.Where(a => a.CreatedAt <= createdTo.Value.UtcDateTime);
+
+        return query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+    }
 }

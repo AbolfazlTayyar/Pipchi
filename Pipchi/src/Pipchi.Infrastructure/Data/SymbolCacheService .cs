@@ -1,68 +1,56 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using Newtonsoft.Json;
 using Pipchi.Core.Interfaces;
 using Pipchi.Core.SyncedAggregates;
 using Pipchi.SharedKernel.Interfaces;
-using StackExchange.Redis;
 
 namespace Pipchi.Infrastructure.Data;
 
 public class SymbolCacheService : ISymbolCacheService
 {
-    private readonly IConnectionMultiplexer _redis;
+    private readonly IDistributedCache _cache;
     private readonly IRepository<Symbol> _repository;
-    private readonly IDatabase _db;
     private const string KEY_PREFIX = "symbol:";
     private const string ALL_KEY = "symbols:all";
-    private readonly TimeSpan _expiration = TimeSpan.FromHours(24);
-
-    public SymbolCacheService(IConnectionMultiplexer redis, IRepository<Symbol> repository)
+    private readonly DistributedCacheEntryOptions _cacheOptions = new()
     {
-        _redis = redis;
+        AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24)
+    };
+
+    public SymbolCacheService(IDistributedCache cache, IRepository<Symbol> repository)
+    {
+        _cache = cache;
         _repository = repository;
-        _db = redis.GetDatabase();
     }
 
     public async Task<List<Symbol>> GetAllAsync(CancellationToken cancellationToken)
     {
-        var cached = await _db.StringGetAsync(ALL_KEY);
-
-        if (cached.HasValue)
-            return JsonConvert.DeserializeObject<List<Symbol>>(cached.ToString()) ?? new();
+        var cached = await _cache.GetStringAsync(ALL_KEY, cancellationToken);
+        if (cached is not null)
+            return JsonConvert.DeserializeObject<List<Symbol>>(cached) ?? new();
 
         var symbols = await _repository.ListAsync(cancellationToken);
-        await _db.StringSetAsync(ALL_KEY, JsonConvert.SerializeObject(symbols), _expiration);
-
+        await _cache.SetStringAsync(ALL_KEY, JsonConvert.SerializeObject(symbols), _cacheOptions, cancellationToken);
         return symbols;
     }
 
     public async Task<Symbol?> GetByIdAsync(int id)
     {
         string key = $"{KEY_PREFIX}{id}";
-        var cached = await _db.StringGetAsync(key);
-
-        if (cached.HasValue)
-            return JsonConvert.DeserializeObject<Symbol>(cached.ToString());
+        var cached = await _cache.GetStringAsync(key);
+        if (cached is not null)
+            return JsonConvert.DeserializeObject<Symbol>(cached);
 
         var symbol = await _repository.GetByIdAsync(id);
         if (symbol != null)
-            await _db.StringSetAsync(key, JsonConvert.SerializeObject(symbol), _expiration);
+            await _cache.SetStringAsync(key, JsonConvert.SerializeObject(symbol), _cacheOptions);
 
         return symbol;
     }
 
     public async Task InvalidateAsync(int id)
     {
-        await _db.KeyDeleteAsync($"{KEY_PREFIX}{id}");
-        await _db.KeyDeleteAsync(ALL_KEY);
-    }
-
-    public async Task InvalidateAllAsync()
-    {
-        var server = _redis.GetServer(_redis.GetEndPoints().First());
-        await foreach (var key in server.KeysAsync(pattern: $"{KEY_PREFIX}*"))
-        {
-            await _db.KeyDeleteAsync(key);
-        }
-        await _db.KeyDeleteAsync(ALL_KEY);
+        await _cache.RemoveAsync($"{KEY_PREFIX}{id}");
+        await _cache.RemoveAsync(ALL_KEY);
     }
 }

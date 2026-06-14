@@ -10,4 +10,15 @@ public interface IAccountRepository : IRepository<Account>, IAggregateRoot
         Guid? lastId,
         int pageSize,
         CancellationToken ct = default);
+
+    Task<List<Account>> SearchAsync(
+        string currency,
+        decimal? minBalance,
+        decimal? maxBalance,
+        int? leverage,
+        DateTimeOffset? createdFrom,
+        DateTimeOffset? createdTo,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default);
 }

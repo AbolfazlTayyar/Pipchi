@@ -1,6 +1,5 @@
 ﻿using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Pipchi.Api.Models.Account;
 using Pipchi.Core.AccountAggregate;
@@ -45,6 +44,21 @@ public class AccountSearchService
         );
     }
 
+    public async Task IndexAsync(Account account, CancellationToken cancellationToken)
+    {
+        var doc = new AccountDocument
+        {
+            Id = account.Id,
+            BalanceAmount = account.Balance.Amount,
+            BalanceCurrency = account.Balance.Currency,
+            CreatedAt = account.CreatedAt,
+            UpdatedAt = account.UpdatedAt,
+            Leverage = account.Leverage
+        };
+
+        await _client.IndexAsync(doc, IndexName, cancellationToken);
+    }
+
     public async Task BulkIndexAccountsAsync(IEnumerable<Account> accounts)
     {
         var docs = accounts.Select(account => new AccountDocument
@@ -63,15 +77,15 @@ public class AccountSearchService
         );
     }
 
-    public async Task<List<Account>> SearchAsync(AccountFilterRequest filter)
+    public async Task<List<AccountDocument>> SearchAsync(AccountFilterRequest filter)
     {
-        var mustClauses = new List<Action<QueryDescriptor<Account>>>();
+        var mustClauses = new List<Action<QueryDescriptor<AccountDocument>>>();
 
         if (!string.IsNullOrEmpty(filter.Currency))
             mustClauses.Add(q => q
                 .Term(t => t
-                    .Field(f => f.Balance.Currency.Suffix("keyword"))
-                    .Value(filter.Currency)
+                    .Field(f => f.BalanceCurrency.Suffix("keyword"))
+                    .Value(filter.Currency.ToUpperInvariant())
                 )
             );
 
@@ -88,7 +102,7 @@ public class AccountSearchService
                 .Range(r => r
                     .NumberRange(n =>
                     {
-                        n.Field(f => f.Balance.Amount);
+                        n.Field(f => f.BalanceAmount);
 
                         if (filter.MinBalance.HasValue)
                             n.Gte((double)filter.MinBalance.Value);
@@ -115,7 +129,7 @@ public class AccountSearchService
                 )
             );
 
-        var response = await _client.SearchAsync<Account>(s => s
+        var response = await _client.SearchAsync<AccountDocument>(s => s
             .Indices(ElasticIndexes.Accounts)
             .From((filter.Page - 1) * filter.PageSize)
             .Size(filter.PageSize)
